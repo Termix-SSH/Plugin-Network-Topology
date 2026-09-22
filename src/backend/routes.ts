@@ -1,12 +1,12 @@
 import express from "express";
-import { AuthManager } from "../../../src/backend/utils/auth-manager.js";
-import type { AuthenticatedRequest } from "../../../src/types/index.js";
-import { databaseLogger } from "../../../src/backend/utils/logger.js";
-import { createCurrentNetworkTopologyRepository } from "../../../src/backend/database/repositories/factory.js";
+import { AuthManager } from "../../../../src/backend/utils/auth-manager.js";
+import type { AuthenticatedRequest } from "../../../../src/types/index.js";
+import { databaseLogger } from "../../../../src/backend/utils/logger.js";
+import { createCurrentNetworkTopologyRepository } from "../../../../src/backend/database/repositories/factory.js";
 import {
   registerNetworkTopologyRouter,
   unregisterNetworkTopologyRouter,
-} from "../../../src/backend/database/routes/network-topology-dispatch.js";
+} from "../../../../src/backend/database/routes/network-topology-dispatch.js";
 
 export const router = express.Router();
 
