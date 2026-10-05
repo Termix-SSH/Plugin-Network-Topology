@@ -13,19 +13,12 @@ import {
   Card,
   Button,
   Badge,
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogAction,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
   Input,
   Label,
   Select2,
+  useConfirm,
   useTabsSafe,
+  InlineView,
 } from "@termix/plugin-sdk/ui";
 import {
   useTranslation,
@@ -54,6 +47,7 @@ import {
   ArrowUp,
   Network,
   Loader2,
+  X,
 } from "lucide-react";
 import {
   createNetworkTopologyApi,
@@ -63,14 +57,14 @@ import {
 } from "./network-topology-api";
 
 const AVAILABLE_COLORS = [
-  { value: "#ef4444", label: "Red" },
-  { value: "#f97316", label: "Orange" },
-  { value: "#eab308", label: "Yellow" },
-  { value: "#22c55e", label: "Green" },
-  { value: "#3b82f6", label: "Blue" },
-  { value: "#a855f7", label: "Purple" },
-  { value: "#ec4899", label: "Pink" },
-  { value: "#6b7280", label: "Gray" },
+  { value: "#ef4444", label: "red" },
+  { value: "#f97316", label: "orange" },
+  { value: "#eab308", label: "yellow" },
+  { value: "#22c55e", label: "green" },
+  { value: "#3b82f6", label: "blue" },
+  { value: "#a855f7", label: "purple" },
+  { value: "#ec4899", label: "pink" },
+  { value: "#6b7280", label: "gray" },
 ];
 
 type HostStatus = "online" | "offline" | "unknown";
@@ -248,6 +242,7 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
   isVisible = true,
 }: NetworkGraphCardProps): React.ReactElement {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const hostActions = useHostActions();
   const { addTab } = useTabsSafe();
   const pluginApi = usePluginApi();
@@ -660,8 +655,15 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
       setSelectedHostForAddNode("");
       setShowAddNodeDialog(true);
     } else if (action === "delete") {
-      cyRef.current.$id(targetId).remove();
-      debouncedSave();
+      const label = cyRef.current.$id(targetId).data("label") ?? "";
+      void confirm({
+        title: t("networkGraph.deleteConfirm", { name: label }),
+        confirmLabel: t("networkGraph.delete"),
+      }).then((ok) => {
+        if (!ok || !cyRef.current) return;
+        cyRef.current.$id(targetId).remove();
+        debouncedSave();
+      });
     }
   };
 
@@ -751,8 +753,17 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
     setShowAddEdgeDialog(false);
   };
 
-  const handleRemoveSelected = () => {
+  const handleRemoveSelected = async () => {
     if (!cyRef.current) return;
+    const targetId = selectedNodeId ?? selectedEdgeId;
+    if (!targetId) return;
+    const ok = await confirm({
+      title: t("networkGraph.deleteConfirm", {
+        name: cyRef.current.$id(targetId).data("label") ?? "",
+      }),
+      confirmLabel: t("networkGraph.delete"),
+    });
+    if (!ok || !cyRef.current) return;
     if (selectedNodeId) {
       cyRef.current.$id(selectedNodeId).remove();
       setSelectedNodeId(null);
@@ -948,63 +959,35 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
     </div>
   );
 
+  const errorBanner = error ? (
+    <div
+      role="alert"
+      className="flex shrink-0 items-center gap-2 border-b border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+    >
+      <AlertCircle className="size-3.5 shrink-0" />
+      <span className="min-w-0 flex-1">{error}</span>
+      <button
+        type="button"
+        onClick={() => setError(null)}
+        aria-label={t("networkGraph.dismiss")}
+        title={t("networkGraph.dismiss")}
+        className="flex size-5 items-center justify-center hover:text-foreground"
+      >
+        <X className="size-3" />
+      </button>
+    </div>
+  ) : null;
+
   const dialogs = (
     <>
-      <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
-        <AlertDialogContent className="bg-card border border-border">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-            <AlertDialogDescription className="text-foreground flex-1">
-              {error}
-            </AlertDialogDescription>
-          </div>
-          <div className="flex justify-end">
-            <AlertDialogAction onClick={() => setError(null)}>
-              OK
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* Add Host dialog */}
-      <Dialog open={showAddNodeDialog} onOpenChange={setShowAddNodeDialog}>
-        <DialogContent className="bg-card border border-border">
-          <DialogHeader>
-            <DialogTitle>{t("networkGraph.addHost")}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.selectHost")}</Label>
-              <Select2
-                className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
-                value={selectedHostForAddNode}
-                onChange={(e) => setSelectedHostForAddNode(e.target.value)}
-              >
-                <option value="">{t("networkGraph.chooseHost")}</option>
-                {availableHostsForAdd.map((h) => (
-                  <option key={h.id} value={String(h.id)}>
-                    {h.name || h.ip}
-                  </option>
-                ))}
-              </Select2>
-            </div>
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.parentGroup")}</Label>
-              <Select2
-                className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
-                value={selectedGroupForAddNode}
-                onChange={(e) => setSelectedGroupForAddNode(e.target.value)}
-              >
-                <option value="ROOT">{t("networkGraph.noGroup")}</option>
-                {availableGroups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.label}
-                  </option>
-                ))}
-              </Select2>
-            </div>
-          </div>
-          <DialogFooter>
+
+      <InlineView
+        open={showAddNodeDialog}
+        onOpenChange={setShowAddNodeDialog}
+        title={t("networkGraph.addHost")}
+        footer={
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => setShowAddNodeDialog(false)}
@@ -1017,12 +1000,46 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             >
               {t("common.add")}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.selectHost")}</Label>
+            <Select2
+              className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+              value={selectedHostForAddNode}
+              onChange={(e) => setSelectedHostForAddNode(e.target.value)}
+            >
+              <option value="">{t("networkGraph.chooseHost")}</option>
+              {availableHostsForAdd.map((h) => (
+                <option key={h.id} value={String(h.id)}>
+                  {h.name || h.ip}
+                </option>
+              ))}
+            </Select2>
+          </div>
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.parentGroup")}</Label>
+            <Select2
+              className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+              value={selectedGroupForAddNode}
+              onChange={(e) => setSelectedGroupForAddNode(e.target.value)}
+            >
+              <option value="ROOT">{t("networkGraph.noGroup")}</option>
+              {availableGroups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.label}
+                </option>
+              ))}
+            </Select2>
+          </div>
+        </div>
+      </InlineView>
 
       {/* Add / Edit Group dialog */}
-      <Dialog
+
+      <InlineView
         open={showAddGroupDialog || showEditGroupDialog}
         onOpenChange={(o) => {
           if (!o) {
@@ -1030,45 +1047,15 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             setShowEditGroupDialog(false);
           }
         }}
-      >
-        <DialogContent className="bg-card border border-border">
-          <DialogHeader>
-            <DialogTitle>
-              {showEditGroupDialog
-                ? t("networkGraph.editGroup")
-                : t("networkGraph.createGroup")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.groupName")}</Label>
-              <Input
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                placeholder={t("networkGraph.groupName")}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.color")}</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {AVAILABLE_COLORS.map((c) => (
-                  <button
-                    key={c.value}
-                    type="button"
-                    onClick={() => setNewGroupColor(c.value)}
-                    className={`h-9 rounded border-2 transition-all ${
-                      newGroupColor === c.value
-                        ? "border-accent-brand ring-1 ring-accent-brand"
-                        : "border-border hover:border-muted-foreground"
-                    }`}
-                    style={{ backgroundColor: c.value }}
-                    title={c.label}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
+        title={
+          <>
+            {showEditGroupDialog
+              ? t("networkGraph.editGroup")
+              : t("networkGraph.createGroup")}
+          </>
+        }
+        footer={
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -1084,36 +1071,48 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             >
               {showEditGroupDialog ? t("common.update") : t("common.create")}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Move to Group dialog */}
-      <Dialog open={showMoveNodeDialog} onOpenChange={setShowMoveNodeDialog}>
-        <DialogContent className="bg-card border border-border">
-          <DialogHeader>
-            <DialogTitle>{t("networkGraph.moveToGroup")}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.selectGroup")}</Label>
-              <Select2
-                className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
-                value={selectedGroupForMove}
-                onChange={(e) => setSelectedGroupForMove(e.target.value)}
-              >
-                <option value="ROOT">{t("networkGraph.noGroup")}</option>
-                {availableGroups
-                  .filter((g) => g.id !== selectedNodeId)
-                  .map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.label}
-                    </option>
-                  ))}
-              </Select2>
+          </div>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.groupName")}</Label>
+            <Input
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              placeholder={t("networkGraph.groupName")}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.color")}</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {AVAILABLE_COLORS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => setNewGroupColor(c.value)}
+                  className={`h-9 rounded border-2 transition-all ${
+                    newGroupColor === c.value
+                      ? "border-accent-brand ring-1 ring-accent-brand"
+                      : "border-border hover:border-muted-foreground"
+                  }`}
+                  style={{ backgroundColor: c.value }}
+                  title={t(`networkGraph.colors.${c.label}`)}
+                />
+              ))}
             </div>
           </div>
-          <DialogFooter>
+        </div>
+      </InlineView>
+
+      {/* Move to Group dialog */}
+
+      <InlineView
+        open={showMoveNodeDialog}
+        onOpenChange={setShowMoveNodeDialog}
+        title={t("networkGraph.moveToGroup")}
+        footer={
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => setShowMoveNodeDialog(false)}
@@ -1123,53 +1122,38 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             <Button onClick={handleMoveNodeToGroup}>
               {t("networkGraph.move")}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.selectGroup")}</Label>
+            <Select2
+              className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+              value={selectedGroupForMove}
+              onChange={(e) => setSelectedGroupForMove(e.target.value)}
+            >
+              <option value="ROOT">{t("networkGraph.noGroup")}</option>
+              {availableGroups
+                .filter((g) => g.id !== selectedNodeId)
+                .map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.label}
+                  </option>
+                ))}
+            </Select2>
+          </div>
+        </div>
+      </InlineView>
 
       {/* Add Edge dialog */}
-      <Dialog open={showAddEdgeDialog} onOpenChange={setShowAddEdgeDialog}>
-        <DialogContent className="bg-card border border-border">
-          <DialogHeader>
-            <DialogTitle>{t("networkGraph.addConnection")}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.source")}</Label>
-              <Select2
-                className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
-                value={selectedHostForEdge}
-                onChange={(e) => setSelectedHostForEdge(e.target.value)}
-              >
-                <option value="">
-                  {t("networkGraph.selectSourcePlaceholder")}
-                </option>
-                {availableNodesForConnection.map((el) => (
-                  <option key={el.id} value={el.id}>
-                    {el.label}
-                  </option>
-                ))}
-              </Select2>
-            </div>
-            <div className="grid gap-2">
-              <Label>{t("networkGraph.target")}</Label>
-              <Select2
-                className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
-                value={targetHostForEdge}
-                onChange={(e) => setTargetHostForEdge(e.target.value)}
-              >
-                <option value="">
-                  {t("networkGraph.selectTargetPlaceholder")}
-                </option>
-                {availableNodesForConnection.map((el) => (
-                  <option key={el.id} value={el.id}>
-                    {el.label}
-                  </option>
-                ))}
-              </Select2>
-            </div>
-          </div>
-          <DialogFooter>
+
+      <InlineView
+        open={showAddEdgeDialog}
+        onOpenChange={setShowAddEdgeDialog}
+        title={t("networkGraph.addConnection")}
+        footer={
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => setShowAddEdgeDialog(false)}
@@ -1177,53 +1161,92 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
               {t("common.cancel")}
             </Button>
             <Button onClick={handleAddEdge}>{t("networkGraph.connect")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.source")}</Label>
+            <Select2
+              className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+              value={selectedHostForEdge}
+              onChange={(e) => setSelectedHostForEdge(e.target.value)}
+            >
+              <option value="">
+                {t("networkGraph.selectSourcePlaceholder")}
+              </option>
+              {availableNodesForConnection.map((el) => (
+                <option key={el.id} value={el.id}>
+                  {el.label}
+                </option>
+              ))}
+            </Select2>
+          </div>
+          <div className="grid gap-2">
+            <Label>{t("networkGraph.target")}</Label>
+            <Select2
+              className="flex h-9 w-full border border-border bg-background px-3 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+              value={targetHostForEdge}
+              onChange={(e) => setTargetHostForEdge(e.target.value)}
+            >
+              <option value="">
+                {t("networkGraph.selectTargetPlaceholder")}
+              </option>
+              {availableNodesForConnection.map((el) => (
+                <option key={el.id} value={el.id}>
+                  {el.label}
+                </option>
+              ))}
+            </Select2>
+          </div>
+        </div>
+      </InlineView>
 
       {/* Node Detail dialog */}
-      <Dialog open={showNodeDetail} onOpenChange={setShowNodeDetail}>
-        <DialogContent className="bg-card border border-border">
-          <DialogHeader>
-            <DialogTitle>{t("networkGraph.hostDetails")}</DialogTitle>
-          </DialogHeader>
-          {selectedNodeForDetail && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <span className="font-semibold text-muted-foreground">
-                  {t("networkGraph.name")}
-                </span>
-                <span>{selectedNodeForDetail.name}</span>
-                <span className="font-semibold text-muted-foreground">
-                  {t("networkGraph.ip")}
-                </span>
-                <span>{selectedNodeForDetail.ip}</span>
-                <span className="font-semibold text-muted-foreground">
-                  {t("networkGraph.status")}
-                </span>
-                <span className="capitalize">
-                  {selectedNodeForDetail.status || t("networkGraph.unknown")}
-                </span>
-              </div>
-              {selectedNodeForDetail.tags &&
-                selectedNodeForDetail.tags.length > 0 && (
-                  <div className="flex gap-1 flex-wrap">
-                    {selectedNodeForDetail.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-            </div>
-          )}
-          <DialogFooter>
+
+      <InlineView
+        open={showNodeDetail}
+        onOpenChange={setShowNodeDetail}
+        title={t("networkGraph.hostDetails")}
+        footer={
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button variant="outline" onClick={() => setShowNodeDetail(false)}>
               {t("common.close")}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+      >
+        {selectedNodeForDetail && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <span className="font-semibold text-muted-foreground">
+                {t("networkGraph.name")}
+              </span>
+              <span>{selectedNodeForDetail.name}</span>
+              <span className="font-semibold text-muted-foreground">
+                {t("networkGraph.ip")}
+              </span>
+              <span>{selectedNodeForDetail.ip}</span>
+              <span className="font-semibold text-muted-foreground">
+                {t("networkGraph.status")}
+              </span>
+              <span className="capitalize">
+                {selectedNodeForDetail.status || t("networkGraph.unknown")}
+              </span>
+            </div>
+            {selectedNodeForDetail.tags &&
+              selectedNodeForDetail.tags.length > 0 && (
+                <div className="flex gap-1 flex-wrap">
+                  {selectedNodeForDetail.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+          </div>
+        )}
+      </InlineView>
 
       <input
         ref={fileInputRef}
@@ -1296,7 +1319,7 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleRemoveSelected}
+              onClick={() => void handleRemoveSelected()}
               disabled={!selectedNodeId && !selectedEdgeId}
               className="h-7 px-2 text-xs gap-1.5 text-destructive hover:text-destructive disabled:opacity-30"
             >
@@ -1355,6 +1378,7 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             <ExternalLink className="size-3.5" />
           </a>
         </div>
+        {errorBanner}
         {cytoscapeEl}
         {dialogs}
       </div>
@@ -1417,6 +1441,7 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
           </a>
         </div>
       </div>
+      {errorBanner}
       {cytoscapeEl}
       {dialogs}
     </Card>

@@ -41,7 +41,19 @@
     "exportJSON": "Export JSON",
     "importJSON": "Import JSON",
     "serverStats": "Host Metrics",
-    "noNodes": "No nodes yet"
+    "noNodes": "No nodes yet",
+    "deleteConfirm": "Delete {{name}} from the map?",
+    "dismiss": "Dismiss",
+    "colors": {
+      "red": "Red",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink",
+      "gray": "Gray"
+    }
   },
   "nav": {
     "networkGraph": "Network Graph"
