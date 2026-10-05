@@ -5,7 +5,7 @@ import {
   refUser,
   text,
   timestamp,
-} from "@termix/plugin-sdk/db";
+} from "@termix-ssh/plugin-sdk/db";
 
 /**
  * One row per user, holding their saved graph as a JSON blob.

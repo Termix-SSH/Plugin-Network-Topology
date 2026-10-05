@@ -1,5 +1,5 @@
 import type { Router } from "express";
-import type { PluginContext } from "@termix/plugin-sdk/backend";
+import type { PluginContext } from "@termix-ssh/plugin-sdk/backend";
 import { graphs } from "./tables.js";
 import { createGraphRepository } from "./repository.js";
 import { registerGraphRoutes } from "./routes.js";

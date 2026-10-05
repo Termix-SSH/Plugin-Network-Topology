@@ -19,7 +19,7 @@ import {
   useConfirm,
   useTabsSafe,
   InlineView,
-} from "@termix/plugin-sdk/ui";
+} from "@termix-ssh/plugin-sdk/ui";
 import {
   useTranslation,
   usePluginApi,
@@ -28,7 +28,7 @@ import {
   getHostStatusColorScheme,
   useHostActions,
   type PluginHostRecord,
-} from "@termix/plugin-sdk/frontend";
+} from "@termix-ssh/plugin-sdk/frontend";
 import {
   Plus,
   Trash2,

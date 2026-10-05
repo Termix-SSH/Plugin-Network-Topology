@@ -4,7 +4,7 @@ import type {
   DashboardCardProps,
   TabProps,
   TermixApp,
-} from "@termix/plugin-sdk/frontend";
+} from "@termix-ssh/plugin-sdk/frontend";
 import { NetworkGraphCard } from "./NetworkGraphCard";
 
 const VIEW_ID = "network_graph";
