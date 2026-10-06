@@ -10,7 +10,6 @@ import React, {
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
 import {
-  Card,
   Button,
   Badge,
   Input,
@@ -19,6 +18,7 @@ import {
   useConfirm,
   useTabsSafe,
   InlineView,
+  FormFooter,
 } from "@termix-ssh/plugin-sdk/ui";
 import {
   useTranslation,
@@ -987,20 +987,12 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
         onOpenChange={setShowAddNodeDialog}
         title={t("networkGraph.addHost")}
         footer={
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowAddNodeDialog(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              onClick={handleConfirmAddNode}
-              disabled={!selectedHostForAddNode}
-            >
-              {t("common.add")}
-            </Button>
-          </div>
+          <FormFooter
+            onCancel={() => setShowAddNodeDialog(false)}
+            onSave={() => void handleConfirmAddNode()}
+            saveLabel={t("common.add")}
+            disabled={!selectedHostForAddNode}
+          />
         }
       >
         <div className="grid gap-4 py-4">
@@ -1055,23 +1047,21 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
           </>
         }
         footer={
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAddGroupDialog(false);
-                setShowEditGroupDialog(false);
-              }}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              onClick={showEditGroupDialog ? handleUpdateGroup : handleAddGroup}
-              disabled={!newGroupName}
-            >
-              {showEditGroupDialog ? t("common.update") : t("common.create")}
-            </Button>
-          </div>
+          <FormFooter
+            onCancel={() => {
+              setShowAddGroupDialog(false);
+              setShowEditGroupDialog(false);
+            }}
+            onSave={() =>
+              void (showEditGroupDialog
+                ? handleUpdateGroup()
+                : handleAddGroup())
+            }
+            saveLabel={
+              showEditGroupDialog ? t("common.update") : t("common.create")
+            }
+            disabled={!newGroupName}
+          />
         }
       >
         <div className="grid gap-4 py-4">
@@ -1112,17 +1102,11 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
         onOpenChange={setShowMoveNodeDialog}
         title={t("networkGraph.moveToGroup")}
         footer={
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowMoveNodeDialog(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button onClick={handleMoveNodeToGroup}>
-              {t("networkGraph.move")}
-            </Button>
-          </div>
+          <FormFooter
+            onCancel={() => setShowMoveNodeDialog(false)}
+            onSave={() => void handleMoveNodeToGroup()}
+            saveLabel={t("networkGraph.move")}
+          />
         }
       >
         <div className="grid gap-4 py-4">
@@ -1153,15 +1137,11 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
         onOpenChange={setShowAddEdgeDialog}
         title={t("networkGraph.addConnection")}
         footer={
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowAddEdgeDialog(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button onClick={handleAddEdge}>{t("networkGraph.connect")}</Button>
-          </div>
+          <FormFooter
+            onCancel={() => setShowAddEdgeDialog(false)}
+            onSave={() => void handleAddEdge()}
+            saveLabel={t("networkGraph.connect")}
+          />
         }
       >
         <div className="grid gap-4 py-4">
@@ -1209,11 +1189,10 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
         onOpenChange={setShowNodeDetail}
         title={t("networkGraph.hostDetails")}
         footer={
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowNodeDetail(false)}>
-              {t("common.close")}
-            </Button>
-          </div>
+          <FormFooter
+            onCancel={() => setShowNodeDetail(false)}
+            cancelLabel={t("common.close")}
+          />
         }
       >
         {selectedNodeForDetail && (
@@ -1388,11 +1367,11 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
   /* embedded card */
   const nodeCount = graphElements.filter((e) => !e.data.source).length;
   return (
-    <Card className="flex flex-col overflow-hidden w-full h-full py-0 gap-0 min-h-0">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-        <div className="flex items-center gap-2">
-          <Network className="size-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
+        <div className="flex min-w-0 items-center gap-2">
+          <Network className="size-3 shrink-0 text-muted-foreground" />
+          <span className="truncate text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             {t("dashboard.networkGraph")}
           </span>
           {!loading && (
@@ -1444,6 +1423,6 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
       {errorBanner}
       {cytoscapeEl}
       {dialogs}
-    </Card>
+    </div>
   );
 });
