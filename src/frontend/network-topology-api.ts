@@ -52,4 +52,4 @@ export function createNetworkTopologyApi(api: PluginApiClient) {
   };
 }
 
-export type NetworkTopologyApi = ReturnType<typeof createNetworkTopologyApi>;
+type NetworkTopologyApi = ReturnType<typeof createNetworkTopologyApi>;
