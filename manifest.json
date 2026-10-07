@@ -10,6 +10,13 @@
   "repository": "https://github.com/Termix-SSH/Plugin-Network-Topology",
   "category": "Infrastructure",
   "icon": "Network",
+  "features": [
+    "Add hosts and draw links between them",
+    "Live status for each host",
+    "Nested, colored groups",
+    "Import and export as JSON",
+    "A dashboard card for the graph"
+  ],
   "engine": {
     "termix": ">=26.10.0",
     "api": "1"
