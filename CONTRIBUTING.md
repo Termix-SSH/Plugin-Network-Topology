@@ -13,3 +13,9 @@ npm run format     # format the code with Prettier
 ## Permissions
 
 - `network-topology.use`: view and edit the network graph. Admins and users have it by default.
+
+## Services
+
+Provides to other plugins:
+
+- `network-topology.graph`: read a user's graph

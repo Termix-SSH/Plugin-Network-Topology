@@ -26,14 +26,6 @@ Network Topology draws your hosts and the links between them as an interactive g
 
 <br />
 
-## Services
-
-Provides to other plugins:
-
-- `network-topology.graph`: read a user's graph
-
-<br />
-
 ## Sponsors
 
 Interested in a paid placement to support development? Email [mail@termix.site](mailto:mail@termix.site).
