@@ -8,6 +8,7 @@
   },
   "license": "Apache-2.0",
   "repository": "https://github.com/Termix-SSH/Plugin-Network-Topology",
+  "docs": "https://docs.termix.site/plugins/network-topology",
   "category": "Infrastructure",
   "icon": "Network",
   "features": [
@@ -19,7 +20,7 @@
   ],
   "engine": {
     "termix": ">=26.10.0",
-    "api": "1"
+    "api": "^1.2"
   },
   "capabilities": ["db:own", "network:serve", "ui:surface"],
   "provides": [

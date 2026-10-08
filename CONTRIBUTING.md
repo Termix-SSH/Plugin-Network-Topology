@@ -10,12 +10,6 @@ npm run validate   # check manifest.json
 npm run format     # format the code with Prettier
 ```
 
-## Permissions
+## Docs
 
-- `network-topology.use`: view and edit the network graph. Admins and users have it by default.
-
-## Services
-
-Provides to other plugins:
-
-- `network-topology.graph`: read a user's graph
+The docs for this plugin are in [docs/](docs/) and are published at https://docs.termix.site/plugins/network-topology. Settings, permissions, services, environment variables and the API reference are made from `manifest.json` and the `@openapi` comments in the code, so keep those up to date instead of writing them by hand. See [writing docs](https://docs.termix.site/develop/docs).

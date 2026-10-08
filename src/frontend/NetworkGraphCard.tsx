@@ -55,6 +55,7 @@ import {
   type NetworkTopologyNode,
   type NetworkTopologyEdge,
 } from "./network-topology-api";
+import { docsUrl } from "./docs";
 
 const AVAILABLE_COLORS = [
   { value: "#ef4444", label: "red" },
@@ -1348,7 +1349,7 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
           </div>
           <div className="w-px h-5 bg-border mx-1" />
           <a
-            href="https://docs.termix.site/features/dashboard/network-graph"
+            href={docsUrl()}
             target="_blank"
             rel="noreferrer"
             title={t("hosts.docsLink")}
@@ -1410,7 +1411,7 @@ export const NetworkGraphCard = React.memo(function NetworkGraphCard({
             <ArrowUp className="size-3" />
           </button>
           <a
-            href="https://docs.termix.site/features/dashboard/network-graph"
+            href={docsUrl()}
             target="_blank"
             rel="noreferrer"
             title={t("hosts.docsLink")}

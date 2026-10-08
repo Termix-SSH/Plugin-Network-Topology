@@ -14,6 +14,8 @@
 
 Network Topology draws your hosts and the links between them as an interactive graph with live status.
 
+Read the [docs](https://docs.termix.site/plugins/network-topology) to set it up and use it.
+
 <br />
 
 ## Features
