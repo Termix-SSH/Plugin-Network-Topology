@@ -1,5 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createTestDb, type TestDb } from "@termix-ssh/plugin-sdk/testing";
+import { findUnownedTableWrites } from "@termix-ssh/plugin-sdk/ddl";
 import { pluginDir } from "./helpers";
 
 // network_topology as core's SQLite bootstrap created it before 2.9.0.
@@ -43,7 +46,10 @@ describe("adopting network_topology", () => {
       },
     });
 
-    expect(db.applied).toEqual(["0001_adopt_network_topology"]);
+    expect(db.applied).toEqual([
+      "0001_adopt_network_topology",
+      "0002_mysql_long_topology",
+    ]);
     expect(tableExists("network_topology")).toBe(false);
     expect(tableExists("p_network_topology_graphs")).toBe(true);
 
@@ -91,5 +97,23 @@ describe("adopting network_topology", () => {
         .all() as { user_id: string }[]
     ).map((row) => row.user_id);
     expect(remaining).toEqual(["user-2"]);
+  });
+});
+
+describe("mysql migrations", () => {
+  it("widen topology past the 64KB TEXT cap", () => {
+    const sql = fs.readFileSync(
+      path.join(
+        pluginDir,
+        "migrations",
+        "mysql",
+        "0002_mysql_long_topology.sql",
+      ),
+      "utf8",
+    );
+    expect(sql).toContain(
+      "ALTER TABLE `p_network_topology_graphs` MODIFY COLUMN `topology` mediumtext;",
+    );
+    expect(findUnownedTableWrites("network-topology", sql)).toEqual([]);
   });
 });
