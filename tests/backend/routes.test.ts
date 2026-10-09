@@ -56,6 +56,27 @@ describe("POST /", () => {
     expect(res.body).toEqual({ nodes: [{ data: { id: "a" } }], edges: [] });
   });
 
+  it("accepts a topology sent as a JSON string", async () => {
+    await server.request("POST", "/", {
+      body: { topology: JSON.stringify({ nodes: [], edges: [] }) },
+    });
+    const res = await server.request("GET", "/");
+    expect(res.body).toEqual({ nodes: [], edges: [] });
+  });
+
+  it("rejects a topology that is not a nodes and edges object", async () => {
+    for (const topology of [
+      "not json",
+      [1, 2],
+      { nodes: "x" },
+      { nodes: [], edges: 5 },
+    ]) {
+      const res = await server.request("POST", "/", { body: { topology } });
+      expect(res.status).toBe(400);
+    }
+    expect((await server.request("GET", "/")).body).toBeNull();
+  });
+
   it("rejects a request with no topology", async () => {
     const res = await server.request("POST", "/", { body: {} });
     expect(res.status).toBe(400);
