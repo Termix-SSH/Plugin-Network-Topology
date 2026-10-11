@@ -1,7 +1,7 @@
 {
   "id": "network-topology",
   "name": "Network Topology",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Draws your hosts and the links between them as a live, interactive graph.",
   "author": {
     "name": "Termix"
@@ -22,7 +22,11 @@
     "termix": ">=26.10.0",
     "api": "^1.2"
   },
-  "capabilities": ["db:own", "network:serve", "ui:surface"],
+  "capabilities": [
+    "db:own",
+    "network:serve",
+    "ui:surface"
+  ],
   "provides": [
     {
       "service": "network-topology.graph",
@@ -36,7 +40,10 @@
         "id": "network_graph",
         "titleKey": "nav.networkGraph",
         "icon": "Network",
-        "openFrom": ["rail", "palette"]
+        "openFrom": [
+          "rail",
+          "palette"
+        ]
       }
     ],
     "dashboardCards": [
@@ -51,11 +58,20 @@
         "name": "use",
         "titleKey": "permissions.use.title",
         "descriptionKey": "permissions.use.description",
-        "defaultRoles": ["admin", "user"]
+        "defaultRoles": [
+          "admin",
+          "user"
+        ]
       }
     ],
-    "syncEntities": ["networkTopology"]
+    "syncEntities": [
+      "networkTopology"
+    ]
   },
   "locales": "locales",
-  "platforms": ["linux", "win32", "darwin"]
+  "platforms": [
+    "linux",
+    "win32",
+    "darwin"
+  ]
 }
