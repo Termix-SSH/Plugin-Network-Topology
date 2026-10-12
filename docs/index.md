@@ -6,9 +6,9 @@ Open Network Graph from the sidebar. There is also a Network Graph card you can 
 
 ## Build the graph
 
-- **Add Host**: pick one of your hosts to add as a node.
-- **Add Group**: make a colored group, like a rack or a VLAN. Groups can nest inside other groups.
-- **Add Link**: draw a line from one host to another, like a jump host to the servers behind it.
+- Add Host: pick one of your hosts to add as a node.
+- Add Group: make a colored group, like a rack or a VLAN. Groups can nest inside other groups.
+- Add Link: draw a line from one host to another, like a jump host to the servers behind it.
 
 Right-click a node for more: move it to a group, open its details, connect it, or remove it. Right-click a group to add a host straight into it.
 
