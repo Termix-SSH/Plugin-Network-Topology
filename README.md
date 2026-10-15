@@ -6,6 +6,12 @@
 
 <p>Draws your hosts and the links between them as a live, interactive graph</p>
 
+<!-- VIDEO:START -->
+
+<a href="https://www.youtube.com/watch?v=g_4SRBmA_hw"><img src="https://img.shields.io/badge/Watch_the_demo-f59145?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch the demo on YouTube" /></a>
+
+<!-- VIDEO:END -->
+
 </div>
 
 <br />
