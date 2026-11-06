@@ -79,3 +79,27 @@ describe("network-topology activate", () => {
     );
   });
 });
+
+describe("network-topology operations", () => {
+  it("reads the saved graph as an action", async () => {
+    server = await startServer();
+    await server.request("POST", "/", {
+      body: {
+        topology: {
+          nodes: [{ data: { id: "1", label: "web" } }],
+          edges: [{ data: { source: "1", target: "2" } }],
+        },
+      },
+    });
+    const handler = server.mock.operationHandlers.get(
+      "network-topology.get-graph",
+    )!;
+    const result = await server.mock.actAs("user-1", () =>
+      handler.run({}, {} as never),
+    );
+    expect(result.summary).toBe("1 nodes, 1 links");
+    expect((result.data as { nodes: unknown[] }).nodes).toEqual([
+      { id: "1", name: "web" },
+    ]);
+  });
+});
