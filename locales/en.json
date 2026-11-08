@@ -50,7 +50,8 @@
       "purple": "Purple",
       "pink": "Pink",
       "gray": "Gray"
-    }
+    },
+    "removeSelected": "Remove selected"
   },
   "nav": {
     "networkGraph": "Network Graph"
@@ -74,5 +75,16 @@
   "plugin": {
     "name": "Network Topology",
     "description": "Draws your hosts and the links between them as a live, interactive graph."
+  },
+  "operations": {
+    "graph": {
+      "title": "Get the network topology"
+    }
+  },
+  "widget": {
+    "name": "Network topology",
+    "description": "How many hosts and links your graph has.",
+    "nodes": "Nodes",
+    "links": "Links"
   }
 }

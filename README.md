@@ -31,6 +31,7 @@ Read the [docs](https://docs.termix.site/plugins/network-topology) to set it up 
 - Nested, colored groups
 - Import and export as JSON
 - A dashboard card for the graph
+- A homepage widget with your node and link counts
 
 <br />
 

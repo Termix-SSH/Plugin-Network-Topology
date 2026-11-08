@@ -51,3 +51,12 @@ describe(`${manifest.id} activate`, () => {
     expect(app.registered.actions()).toEqual([]);
   });
 });
+
+describe("homepage widget", () => {
+  it("is offered to the homepage", async () => {
+    rendered = await renderWithApp(plugin, { manifest, locales });
+    expect(rendered.registered.extensions("homepage.widgets")).toEqual([
+      "topology_summary",
+    ]);
+  });
+});
