@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+### Fixed
+
+- The API docs list the path parameters and answers of every route
+
 ## 1.1.0
 
 ### Added
